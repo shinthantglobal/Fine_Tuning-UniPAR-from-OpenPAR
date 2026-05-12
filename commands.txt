@@ -1,0 +1,1 @@
+python train.py     --dataset PA100k     --batchsize 16     --lr 1e-5     --epoch 15     --save_place pa100k_uniPAR     --height 256     --width 128

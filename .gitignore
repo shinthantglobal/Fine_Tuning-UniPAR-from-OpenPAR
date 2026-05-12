@@ -1,0 +1,47 @@
+# Ignore images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tif
+*.tiff
+*.webp
+*.svg
+images/
+img/
+
+# Ignore dataset files and folders
+dataset/
+data/
+datasets/
+*.zip
+*.tar.gz
+*.tar
+*.tgz
+*.7z
+
+# Ignore common generated and unnecessary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+build/
+dist/
+*.egg-info/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+
+# Modeling and Weights
+logs/*
+weights/*
+# Ignore specific files/folders outside or in parent contexts
+../SequencePAR/*
