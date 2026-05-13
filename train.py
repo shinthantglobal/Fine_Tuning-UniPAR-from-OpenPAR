@@ -132,9 +132,9 @@ def trainer(epoch, model, train_loader, valid_loader, criterion_dict, path, args
                       valid_result.instance_f1))
 
             print('-' * 60)
-            if i % args.epoch_save_ckpt == 0:
-                print(f"{path}!")
-                save_ckpt(model, os.path.join(path, f'ckpt_{time_str()}_{i}.pth'), i, valid_result)
+            print(f"{path}!")
+            save_ckpt(model, os.path.join(path, f'ckpt_{time_str()}_{i}.pth'), i, valid_result)
+            print(f"!!! MISSION SUCCESS: Final model !!!")
 
 if __name__ == '__main__':
     parser = argument_parser()

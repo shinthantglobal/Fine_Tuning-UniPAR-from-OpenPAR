@@ -1,1 +1,15 @@
-python train.py     --dataset PA100k     --batchsize 16     --lr 1e-5     --epoch 15     --save_place pa100k_uniPAR     --height 256     --width 128
+python train.py     --dataset PA100k     --batchsize 16     --lr 3e-5     --epoch 15     --save_place pa100k_uniPAR     --height 256     --width 128
+
+
+python train.py \
+    --dataset PA100k \
+    --batchsize 16 \
+    --lr 3e-5 \
+    --epoch 40 \
+    --epoch_save_ckpt 1 \
+    --save_place pa100k_uniPAR_v2 \
+    --height 256 \
+    --width 128
+
+# Performing evaluation with batch_evaluation.py on test set
+python batch_evaluation.py --batchsize 16 --gpus 0

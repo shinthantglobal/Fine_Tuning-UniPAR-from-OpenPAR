@@ -45,3 +45,4 @@ logs/*
 weights/*
 # Ignore specific files/folders outside or in parent contexts
 ../SequencePAR/*
+eval_results/*
