@@ -13,9 +13,9 @@ from dataset.AttrDataset import get_multi_dataset
 from loss.CE_loss import *
 from models.base_block import *
 from tools.function import get_pedestrian_metrics
-from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed, select_gpus
-
+from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed, select_gpus, load_ckpt
 from solver import make_optimizer
+
 from solver.scheduler_factory import create_scheduler
 
 set_seed(605)
@@ -82,21 +82,46 @@ def trainer(epoch, model, train_loader, valid_loader, criterion_dict, path, args
        datasets = [args.dataset]
     else:
         datasets = args.dataset
-    #print(f"Debugg: {dataset}")
-    for dataset in datasets:
+    
+    # Check for resume
+    checkpoint_path = os.path.join(path, 'checkpoint.pth')
+    start_dataset_idx = 0
+    start_epoch = 1
+    if os.path.exists(checkpoint_path):
+        print("Resuming from checkpoint...")
+        loaded_epoch, loaded_dataset, loaded_metric = load_ckpt(model, None, None, checkpoint_path)
+        if loaded_dataset in datasets:
+            start_dataset_idx = datasets.index(loaded_dataset)
+            start_epoch = loaded_epoch + 1
+            print(f"Resuming from dataset {loaded_dataset}, epoch {loaded_epoch}")
+        else:
+            print("Checkpoint dataset not in current datasets, starting from beginning")
+    else:
+        print("No checkpoint found, starting from beginning")
+    
+    for dataset_idx, dataset in enumerate(datasets):
+        if dataset_idx < start_dataset_idx:
+            continue
         print(f'================================', dataset, '================================', '\n')
         torch.cuda.empty_cache()
         optimizer = make_optimizer(model, lr=args.lr, weight_decay=args.weight_decay)
         scheduler = create_scheduler(optimizer, num_epochs=args.epoch, lr=args.lr, warmup_t=5)
+        
+        # If resuming and this is the resuming dataset, load optimizer and scheduler states
+        if dataset_idx == start_dataset_idx and start_epoch > 1:
+            load_ckpt(model, optimizer, scheduler, checkpoint_path)
+        
         criterion = criterion_dict[dataset]
         train_loader.dataset.init_set(dataset)
         valid_loader.dataset.init_set(dataset)
         if dataset=='DUKE': 
-            epoch = args.epoch * 5
+            total_epochs = args.epoch * 5
         else:
-            epoch = args.epoch
-
-        for i in range(1, epoch+1):
+            total_epochs = args.epoch
+        
+        epoch_start = start_epoch if dataset_idx == start_dataset_idx else 1
+        
+        for i in range(epoch_start, total_epochs+1):
             scheduler.step(i)
             train_loss, train_gt, train_probs = batch_trainer(
                 epoch=i,
@@ -133,7 +158,10 @@ def trainer(epoch, model, train_loader, valid_loader, criterion_dict, path, args
 
             print('-' * 60)
             print(f"{path}!")
-            save_ckpt(model, os.path.join(path, f'ckpt_{time_str()}_{i}.pth'), i, valid_result)
+            # Save checkpoint
+            save_ckpt(model, optimizer, scheduler, checkpoint_path, i, dataset, valid_result)
+            # Also save a timestamped version
+            save_ckpt(model, optimizer, scheduler, os.path.join(path, f'ckpt_{time_str()}_{i}.pth'), i, dataset, valid_result)
             print(f"!!! MISSION SUCCESS: Final model !!!")
 
 if __name__ == '__main__':

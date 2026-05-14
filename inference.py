@@ -13,12 +13,14 @@ def load_model(checkpoint_path, args):
     if torch.cuda.is_available():
         model = model.cuda()
     checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
-    if 'state_dicts' in checkpoint:
+    if 'model_state_dict' in checkpoint:
+        model.load_state_dict(checkpoint['model_state_dict'])
+    elif 'state_dicts' in checkpoint:
         model.load_state_dict(checkpoint['state_dicts'])
     elif 'model' in checkpoint:
         model.load_state_dict(checkpoint['model'])
     else:
-        model.load_state_dict(checkpoint)   
+        model.load_state_dict(checkpoint)
     model.eval()
     return model
 
@@ -79,7 +81,7 @@ def visualize_summary(image, output_text, output_path=None):
 
 def main():
     parser = argparse.ArgumentParser(description="Inference for UniPAR")
-    parser.add_argument('--checkpoint', type=str, required=True, help='Path to model checkpoint')
+    parser.add_argument('--checkpoint', type=str, required=True, default='./logs/pa100k_uniPAR_v2/2026-05-13_16_58_39/ckpt_2026-05-14_03_56_03_40.pth', help='Path to model checkpoint')
     parser.add_argument('--image', type=str, required=True, help='Path to input image')
     parser.add_argument('--output', type=str, default='./output', help='Output directory')
     parser.add_argument('--dataset', type=str, default='PA100k', help='Dataset name')

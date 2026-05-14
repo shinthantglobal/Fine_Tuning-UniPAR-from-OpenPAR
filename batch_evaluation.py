@@ -66,10 +66,17 @@ def main():
 
     # 4. Model Setup
     model = TransformerClassifier(args=args)
-    checkpoint_path = "logs/pa100k_uniPAR_v2/2026-05-12_15_22_24/ckpt_2026-05-12_16_45_35_5.pth" 
+    checkpoint_path = "logs/pa100k_uniPAR_v2/2026-05-13_16_58_39/ckpt_2026-05-14_03_56_03_40.pth" 
     
     checkpoint = torch.load(checkpoint_path, map_location='cpu')
-    state_dict = checkpoint.get('state_dicts', checkpoint.get('model', checkpoint))
+    if 'model_state_dict' in checkpoint:
+        state_dict = checkpoint['model_state_dict']
+    elif 'state_dicts' in checkpoint:
+        state_dict = checkpoint['state_dicts']
+    elif 'model' in checkpoint:
+        state_dict = checkpoint['model']
+    else:
+        state_dict = checkpoint
     model.load_state_dict(state_dict)
     
     if torch.cuda.is_available():

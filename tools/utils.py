@@ -299,25 +299,41 @@ def load_state_dict(model, src_state_dict):
             print('\t', n)
 
 
-def load_ckpt(modules_optims, ckpt_file, load_to_cpu=True, verbose=True):
+def load_ckpt(model, optimizer, scheduler, ckpt_file, load_to_cpu=True, verbose=True):
     """
-    load state_dict of module & optimizer from file
+    load state_dict of module, optimizer, scheduler from file
     Args:
-        modules_optims: A two-element list which contains module and optimizer
+        model: the model
+        optimizer: the optimizer
+        scheduler: the scheduler
         ckpt_file: the check point file 
         load_to_cpu: Boolean, whether to preprocess tensors in models & optimizer to cpu type
     """
     map_location = (lambda storage, loc: storage) if load_to_cpu else None
+    if not os.path.exists(ckpt_file):
+        return None, None, None
     ckpt = torch.load(ckpt_file, map_location=map_location)
-    for m, sd in zip(modules_optims, ckpt['state_dicts']):
-        m.load_state_dict(sd)
+    if 'model_state_dict' in ckpt:
+        model_state = ckpt['model_state_dict']
+    elif 'state_dicts' in ckpt:
+        model_state = ckpt['state_dicts']
+    else:
+        model_state = ckpt
+    model.load_state_dict(model_state)
+    if optimizer is not None and 'optimizer_state_dict' in ckpt:
+        optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+    if scheduler is not None and 'scheduler_state_dict' in ckpt:
+        scheduler.load_state_dict(ckpt['scheduler_state_dict'])
     if verbose:
-        print("Resume from ckpt {}, \nepoch: {}, scores: {}".format(
-            ckpt_file, ckpt['ep'], ckpt['scores']))
-    return ckpt['ep'], ckpt['scores']
+        print("Resume from ckpt {}, \nepoch: {}, dataset: {}, metric: {}".format(
+            ckpt_file,
+            ckpt.get('epoch', 'N/A'),
+            ckpt.get('dataset', 'N/A'),
+            ckpt.get('metric', 'N/A')))
+    return ckpt.get('epoch', None), ckpt.get('dataset', None), ckpt.get('metric', None)
 
 
-def save_ckpt(model, ckpt_files, epoch, metric):
+def save_ckpt(model, optimizer, scheduler, ckpt_files, epoch, dataset, metric):
     """
     Note:
         torch.save() reserves device type and id of tensors to save.
@@ -328,8 +344,13 @@ def save_ckpt(model, ckpt_files, epoch, metric):
     if not os.path.exists(os.path.dirname(os.path.abspath(ckpt_files))):
         os.makedirs(os.path.dirname(os.path.abspath(ckpt_files)))
 
-    save_dict = {'state_dicts': model.state_dict(),
-                 'epoch': f'{time_str()} in epoch {epoch}',
+    model_state = model.state_dict()
+    save_dict = {'model_state_dict': model_state,
+                 'state_dicts': model_state,
+                 'optimizer_state_dict': optimizer.state_dict(),
+                 'scheduler_state_dict': scheduler.state_dict(),
+                 'epoch': epoch,
+                 'dataset': dataset,
                  'metric': metric}
     torch.save(save_dict, ckpt_files)
 
