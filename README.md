@@ -24,10 +24,29 @@ UniPAR is a unified framework for pedestrian attribute recognition that leverage
 pip install -r requirements.txt
 ```
 
-```
 ### Pre-trained Model
+```
 Download the ImageNet pre-trained ViT-Base model:
 - [ViT-Base](https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_base_p16_224-80ecf9dd.pth)
+``` 
+
+## Prepartion of Dataset [ PA100k ]
+### LOAD Your Data into data/ <- This folder
+```
+UniPAR/
+├── assets/              
+├── data/PA100k
+        ├── data/ <- 100K images
+        ├── annotation.mat
+        ├── dataset.pkl <-> Will be created via the below process.
+├── dataset/
+```
+
+## Run
+```bash
+cd dataset/preprocess
+python pa100k.py -> afterwards you will get dataset.pkl [ Update file path according to your directory ]
+```
 
 ## 🚀 Training
 
