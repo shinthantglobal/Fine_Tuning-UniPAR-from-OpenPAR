@@ -103,6 +103,8 @@ def main():
     test_filenames = [dataset_info.image_name[idx] for idx in test_indices]
 
     print(f"Starting evaluation on {len(test_filenames)} test images...")
+    # To decide Mean of the age baseline:
+    sum = 0
     with torch.no_grad():
         for i in tqdm(range(len(multi_valid_set))):
             # Check the first few attributes to see the naming conventionye
@@ -110,7 +112,7 @@ def main():
             # for idx, name in enumerate(attributes[:5]):
             #     print(f"Index {idx}: {name}")
             # Accessing via index to get the raw image info
-            img_tensor, gt_label, img_info, _ = multi_valid_set[i]
+            img_tensor, gt_label, _, _ = multi_valid_set[i]
             
             # Prepare Input
             img_input = img_tensor.unsqueeze(0)
@@ -122,6 +124,8 @@ def main():
             probs = torch.sigmoid(logits).cpu().numpy().flatten()
 
             # Process Gender
+            age_prob = probs[gender_idx]
+            sum += age_prob
             pred_gender_idx = 1 if probs[gender_idx] > 0.5 else 0
             all_gender_gt.append(gt_label[gender_idx])
             all_gender_pred.append(pred_gender_idx)
@@ -170,6 +174,7 @@ def main():
     print(f"Age Macro-F1:    {f1_score(all_age_gt, all_age_pred, average='macro'):.4f}")
     print("="*40)
     print(f"Visualizations saved to: {vis_dir}")
+    print(f"Age Threshold: {sum/len(multi_valid_set)} in {len(multi_valid_set)}.")
 
 if __name__ == '__main__':
     main()

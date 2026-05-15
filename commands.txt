@@ -15,3 +15,21 @@ python train.py \
 python batch_evaluation.py --batchsize 16 --gpus 0
 
 python train.py --dataset PA100k --batchsize 16 --lr 3e-5 --epoch 40 --save_place pa100k_uniPAR_v2 --height 256 --width 128
+
+
+# Resume
+
+python train.py \
+  --resume logs/pa100k_uniPAR_v2/2026-05-13_16_58_39 \
+  --dataset PA100k \
+  --batchsize 16 \
+  --lr 3e-5 \
+  --epoch 80 \
+  --save_place pa100k_uniPAR_v2 \
+  --height 256 \
+  --width 128
+
+# Running Video Inference
+python video_inference.py --checkpoint ./logs/pa100k_uniPAR_v2/2026-05-13_16_58_39/checkpoint.pth --video ./vpath_to_your_video.mp4 --dataset PA100k --output video_output/path_to_your_output.mp4
+
+python video_inference.py --checkpoint ./logs/pa100k_uniPAR_v2/2026-05-13_16_58_39/checkpoint.pth --video ./video/video.mp4 --dataset PA100k --output video_output/video.mp4

@@ -24,14 +24,18 @@ def main(args):
     if args.gpus is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus  # 将--gpus参数映射到环境变量
         print(f"Using GPU(s): {args.gpus}")
-    start_time=time_str()
-    print(f'start_time is {start_time}')
-    log_dir = os.path.join('logs', args.save_place)
-    if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
-    log_dir = os.path.join(log_dir, start_time)
-    if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
+    if args.resume:
+        log_dir = args.resume
+        if not os.path.exists(log_dir):
+            raise FileNotFoundError(f"Resume directory not found: {log_dir}")
+        print(f"Resuming training in existing log directory: {log_dir}")
+    else:
+        start_time = time_str()
+        print(f'start_time is {start_time}')
+        log_dir = os.path.join('logs', args.save_place)
+        os.makedirs(log_dir, exist_ok=True)
+        log_dir = os.path.join(log_dir, start_time)
+        os.makedirs(log_dir, exist_ok=True)
     stdout_file = os.path.join(log_dir, f'stdout_{time_str()}.txt')
 
     if args.redirector:

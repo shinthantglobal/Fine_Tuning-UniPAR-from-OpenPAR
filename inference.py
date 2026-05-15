@@ -81,7 +81,7 @@ def visualize_summary(image, output_text, output_path=None):
 
 def main():
     parser = argparse.ArgumentParser(description="Inference for UniPAR")
-    parser.add_argument('--checkpoint', type=str, required=True, default='./logs/pa100k_uniPAR_v2/2026-05-13_16_58_39/ckpt_2026-05-14_03_56_03_40.pth', help='Path to model checkpoint')
+    parser.add_argument('--checkpoint', type=str, default='./logs/pa100k_uniPAR_v2/2026-05-13_16_58_39/ckpt_2026-05-14_03_56_03_40.pth', help='Path to model checkpoint')
     parser.add_argument('--image', type=str, required=True, help='Path to input image')
     parser.add_argument('--output', type=str, default='./output', help='Output directory')
     parser.add_argument('--dataset', type=str, default='PA100k', help='Dataset name')
@@ -130,11 +130,13 @@ def main():
     for attr, pred in zip(attributes, predictions):
         print(f"  {attr}: {pred:.3f}")
         if attr == gender_attr:
-            attr = 'male' if pred <= 0.5 else 'female'
+            attr = 'male' if pred <= 0.8 else 'female'
+            print(f"Debugg-> Gender Pred: {pred}")
             final_output_string += f'{attr}, '   
         elif attr in age_attrs:
             age_pred_list.append(pred)
     if age_pred_list:
+        print(f"Debugg-> Age_Pred_List: {age_pred_list}")
         age_index = np.argmax(age_pred_list) # -> Reutrn the index of the element
         final_output_string += f'{age_attrs[age_index]}'
     

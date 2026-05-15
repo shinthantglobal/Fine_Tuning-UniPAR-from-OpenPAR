@@ -12,6 +12,8 @@ def argument_parser():
     parser.add_argument("--dataset", type=str, default=['MSP60k','DUKE','EventPAR'])
     # parser.add_argument("--lossrate", type=str, default=[0.8,0.5]) #0.8 ,1,0.5
     parser.add_argument("--save_place", type=str, default="pa100k_finetune_high_acc")
+    parser.add_argument("--resume", type=str, default=None,
+                        help="Path to an existing run directory containing checkpoint.pth to resume training")
     
     parser.add_argument("--batchsize", type=int, default=16)
     parser.add_argument("--epoch", type=int, default=200)
